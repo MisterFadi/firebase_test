@@ -37,15 +37,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (snapshot.hasData) {
                   return const Column(
                     children: [
+                      Icon(
+                        Icons.lock_open,
+                        size: 100,
+                      ),
+                      SizedBox(height: 20),
                       Text("Endlich !!!"),
-                      Icon(Icons.lock_open),
                     ],
                   );
                 } else if (!snapshot.hasData) {
                   return const Column(
                     children: [
+                      Icon(
+                        Icons.lock,
+                        size: 100,
+                      ),
+                      SizedBox(height: 20),
                       Text("Versuch dich einzulogen Brother"),
-                      Icon(Icons.lock),
                     ],
                   );
                 } else if (snapshot.hasError) {
