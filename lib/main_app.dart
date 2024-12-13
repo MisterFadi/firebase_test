@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_test/main.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,34 +14,89 @@ class _HomeScreenState extends State<HomeScreen> {
   final passwordControll = TextEditingController();
   bool showPassword = true;
 
-  void loginUser() async {
+  late Future<List<Map<String, dynamic>>> datenBringMe;
+
+  @override
+  void initState() {
+    super.initState();
+    datenBringMe = pleasePress();
+  }
+
+  Future<void> loginUser() async {
     await FirebaseAuth.instance.signInWithEmailAndPassword(
       email: emailControll.text,
       password: passwordControll.text,
     );
   }
 
-  void logoutUser() async {
+  Future<List<Map<String, dynamic>>> pleasePress() async {
+    try {
+      final querySnapshot = await firestoreInstance.collection("food").get();
+      return querySnapshot.docs.map((doc) => doc.data()).toList();
+    } catch (e) {
+      print("Fehler beim Laden der Daten min Jung");
+    }
+    return [];
+  }
+
+  Future<void> logoutUser() async {
     await FirebaseAuth.instance.signOut();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(
+              height: 30,
+            ),
+            MaterialButton(
+              onPressed: () {
+                pleasePress();
+              },
+              textColor: Colors.black,
+              color: Colors.green,
+              child: const Text("Daten nehmen"),
+            ),
+            Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(width: 10),
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Expanded(
+                  child: SingleChildScrollView(
+                    child: FutureBuilder<List<Map<String, dynamic>>> (
+                      future = datenBringMe,
+                    builder = context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Text(datenBringMe["Obst"] ?? "No Data");
+                      } else if (!snapshot.hasData) {
+                        return const Text("Keine Daten vorhanden min jung");
+                      } else if (snapshot.hasError) {
+                        return const Text("Error 404");
+                      }
+                      return const Text("20 Punkte für Gryffindor");
+                    }),
+                  ),
+                ),
+              ),
+            ),
             StreamBuilder(
               stream: FirebaseAuth.instance.authStateChanges(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return const Column(
                     children: [
-                      Icon(
-                        Icons.lock_open,
-                        size: 100,
-                      ),
+                      Icon(Icons.lock_open, size: 100),
                       SizedBox(height: 20),
                       Text("Endlich !!!"),
                     ],
@@ -48,12 +104,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else if (!snapshot.hasData) {
                   return const Column(
                     children: [
-                      Icon(
-                        Icons.lock,
-                        size: 100,
-                      ),
+                      Icon(Icons.lock, size: 100),
                       SizedBox(height: 20),
-                      Text("Versuch dich einzulogen Brother"),
+                      Text("Bitte einlogen Brother"),
                     ],
                   );
                 } else if (snapshot.hasError) {
@@ -62,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return const Text("20 Punkte für Gryffindor");
               },
             ),
-            const SizedBox(height: 50),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.only(left: 20, right: 20),
               child: TextField(
@@ -133,6 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    );
+    )
   }
 }
