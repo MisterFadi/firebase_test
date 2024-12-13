@@ -74,18 +74,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Expanded(
                   child: SingleChildScrollView(
-                    child: FutureBuilder<List<Map<String, dynamic>>> (
-                      future = datenBringMe,
-                    builder = context, snapshot) {
-                      if (snapshot.hasData) {
-                        return Text(datenBringMe["Obst"] ?? "No Data");
-                      } else if (!snapshot.hasData) {
-                        return const Text("Keine Daten vorhanden min jung");
-                      } else if (snapshot.hasError) {
-                        return const Text("Error 404");
-                      }
-                      return const Text("20 Punkte für Gryffindor");
-                    }),
+                    child: FutureBuilder<List<Map<String, dynamic>>>(
+                        future: datenBringMe,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final data = snapshot.data;
+                            return ListView.builder(
+                              itemBuilder: (context, index) {
+                                return Text(data[index]["name"]);
+                              },
+                              itemCount: data!.length,
+                            );
+                          } else if (!snapshot.hasData) {
+                            return const Text("Keine Daten vorhanden min jung");
+                          } else if (snapshot.hasError) {
+                            return const Text("Error 404");
+                          }
+                          return const Text("20 Punkte für Gryffindor");
+                        }),
                   ),
                 ),
               ),
@@ -186,6 +192,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    )
+    );
   }
 }
